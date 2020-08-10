@@ -107,9 +107,9 @@ void MainWindow::on_eBaudRate_activated(const QString &arg1)
 
 void MainWindow::on_bReSend_clicked(bool checked)
 {
-    if (checked) { // stop
+    if (!checked) { // stop
         resendTimer.stop();
-        ui->bReSend->setText("Send&&Repeat");
+        ui->bReSend->setText("Send && Repeat");
     } else { // start
         resendTimer.start(ui->eReSendTimeMs->value());
         ui->bReSend->setText("Stop");
