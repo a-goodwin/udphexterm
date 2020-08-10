@@ -13,6 +13,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->eReceiver->setData(receiver);
     baudrate = ui->eBaudRate->currentText().toInt();
     on_bUartRefresh_clicked();
+
+    connect(&resendTimer, &QTimer::timeout, this, &MainWindow::on_bSend_clicked);
 }
 
 MainWindow::~MainWindow()
@@ -23,20 +25,16 @@ MainWindow::~MainWindow()
 void MainWindow::on_serials_activated(int index)
 {
     QSerialPortInfo info = ports.at(index);
-
-    // отключаем предыдущий serial
     curSer = info;
-
-
 }
 
 void MainWindow::onSerialData()
 {
+    qDebug() << "onSerialData()";
     QByteArray data = serial.readAll();
     receiver.append(data);
     ui->eReceiver->setData(receiver);
     ui->lNBytes->setText(tr("Read 0x%1 bytes, total 0x%2").arg(data.size(), 4, 16, CH0).arg(receiver.size(), 4, 16, CH0));
-
 }
 
 void MainWindow::on_bClearTransmitter_clicked()
@@ -54,8 +52,9 @@ void MainWindow::on_bClearReceiver_clicked()
 
 void MainWindow::on_bSend_clicked()
 {
-    //if (!serial.isOpen()) return;
-    serial.write(ui->eSender->data());
+    QByteArray data = ui->eSender->data();
+    if (!serial.isOpen()) return;
+    serial.write(data);
 }
 
 void MainWindow::on_bUartRefresh_clicked()
@@ -81,7 +80,7 @@ void MainWindow::on_bConnect_clicked()
 
         // подключаем
         if (serial.open(QIODevice::ReadWrite)) {
-            connect(&serial, &QSerialPort::readyRead, this, &MainWindow::onSerialData);
+            connect(&serial, &QIODevice::readyRead, this, &MainWindow::onSerialData);
             serial.setBaudRate(baudrate);
             br = serial.baudRate();
             ui->lOK->setText(tr("Connected %1 @ %2 ").arg(serial.portName()).arg(br));
@@ -104,4 +103,16 @@ void MainWindow::on_bConnect_clicked()
 void MainWindow::on_eBaudRate_activated(const QString &arg1)
 {
     baudrate = arg1.toInt();
+}
+
+void MainWindow::on_bReSend_clicked(bool checked)
+{
+    if (checked) { // stop
+        resendTimer.stop();
+        ui->bReSend->setText("Send&&Repeat");
+    } else { // start
+        resendTimer.start(ui->eReSendTimeMs->value());
+        ui->bReSend->setText("Stop");
+    }
+
 }

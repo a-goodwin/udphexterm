@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QSerialPort>
 #include <QSerialPortInfo>
+#include <QTimer>
 
 #define CH0 QLatin1Char('0')
 
@@ -25,6 +26,8 @@ protected:
     QList<QSerialPortInfo> ports;
     qint32 baudrate;
     QSerialPortInfo curSer;
+    QTimer resendTimer;
+
 private slots:
     void on_serials_activated(int index);
     void onSerialData();
@@ -34,6 +37,8 @@ private slots:
     void on_bUartRefresh_clicked();
     void on_bConnect_clicked();
     void on_eBaudRate_activated(const QString &arg1);
+
+    void on_bReSend_clicked(bool checked);
 
 private:
     Ui::MainWindow *ui;

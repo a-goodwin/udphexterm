@@ -39,7 +39,7 @@
         <item>
          <widget class="QComboBox" name="eBaudRate">
           <property name="currentText">
-           <string>9600</string>
+           <string>1200</string>
           </property>
           <item>
            <property name="text">
@@ -166,6 +166,46 @@
              <widget class="QPushButton" name="bSend">
               <property name="text">
                <string>Send</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="bReSend">
+              <property name="text">
+               <string>Send &amp;&amp; Repeat</string>
+              </property>
+              <property name="checkable">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_2">
+              <property name="text">
+               <string>every</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSpinBox" name="eReSendTimeMs">
+              <property name="minimumSize">
+               <size>
+                <width>50</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximum">
+               <number>60000</number>
+              </property>
+              <property name="value">
+               <number>300</number>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label">
+              <property name="text">
+               <string>ms</string>
               </property>
              </widget>
             </item>
