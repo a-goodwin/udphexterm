@@ -5,6 +5,7 @@
 #include <QSerialPort>
 #include <QSerialPortInfo>
 #include <QTimer>
+#include <QSystemTrayIcon>
 
 #define CH0 QLatin1Char('0')
 
@@ -20,14 +21,14 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+    QSystemTrayIcon *ticon;
 protected:
     QByteArray sender, receiver;
     QSerialPort serial;
     QList<QSerialPortInfo> ports;
     qint32 baudrate;
     QSerialPortInfo curSer;
-    QTimer resendTimer;
-
+    QTimer resendTimer, refreshTimer;
 private slots:
     void on_serials_activated(int index);
     void onSerialData();
@@ -39,11 +40,12 @@ private slots:
     void on_eBaudRate_activated(const QString &arg1);
 
     void on_bReSend_clicked(bool checked);
-
+    void ticon_activated(QSystemTrayIcon::ActivationReason reason);
 private:
     Ui::MainWindow *ui;
 
-
+    int bytesSent=0;
+    int m_curidx = -1;
 };
 
 #endif // MAINWINDOW_H

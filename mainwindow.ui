@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1039</width>
-    <height>588</height>
+    <width>1129</width>
+    <height>648</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -39,7 +39,7 @@
         <item>
          <widget class="QComboBox" name="eBaudRate">
           <property name="currentText">
-           <string>1200</string>
+           <string>9600</string>
           </property>
           <item>
            <property name="text">
@@ -131,6 +131,13 @@
          <widget class="QLabel" name="lNBytes">
           <property name="text">
            <string>read 0x0000 bytes</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_3">
+          <property name="text">
+           <string>TextLabel</string>
           </property>
          </widget>
         </item>
