@@ -68,8 +68,12 @@ void MainWindow::on_bClearReceiver_clicked()
 
 void MainWindow::on_bSend_clicked()
 {
+
     QByteArray data = ui->eSender->data();
     if (!serial.isOpen()) return;
+
+    qDebug() << "send()";
+
     serial.write(data);
     bytesSent += data.size();
     QString st = ui->lNBytes->text();
@@ -144,13 +148,16 @@ void MainWindow::on_eBaudRate_activated(const QString &arg1)
 void MainWindow::on_bReSend_clicked(bool checked)
 {
     if (!checked) { // stop
+        qDebug() << "stop";
         resendTimer.stop();
         ui->bReSend->setText("Send && Repeat");
     } else { // start
+        qDebug() << "start repeat";
         resendTimer.start(ui->eReSendTimeMs->value());
         ui->bReSend->setText("Stop");
     }
 
+    //ui->bReSend->setChecked(checked);
 }
 
 void MainWindow::ticon_activated(QSystemTrayIcon::ActivationReason reason)
