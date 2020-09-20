@@ -29,6 +29,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&refreshTimer, &QTimer::timeout, this, &MainWindow::on_TimerUartRefresh);
     refreshTimer.setInterval(5000);
     refreshTimer.start();
+
+    _fetchScriptsFromFile();
 }
 
 MainWindow::~MainWindow()
@@ -194,26 +196,64 @@ void MainWindow::_disconn()
 
 }
 
-void MainWindow::on_bAddScript_clicked()
+void MainWindow::_fetchScriptsFromFile()
 {
-    // create horis layout
+    QFile f;
+    f.setFileName("params.ini");
+    f.open(QIODevice::ReadOnly);
+    QString st;
+    QString idxSt, cmdSt;
+    int mid=0;
+    while(!f.atEnd()) {
+        st = f.readLine();
+        mid = st.indexOf(',');
+        idxSt = st.left(mid);
+        if (idxSt.length()==0) continue;
+        cmdSt = st.mid(mid+1);
+        cmdSt.chop(1); // remove \n
+        on_bAddScript_clicked(idxSt, cmdSt);
+    }
+    f.close();
+}
+
+void MainWindow::_saveScriptsToFile()
+{
+    QFile f;
+    f.setFileName("params.ini");
+    f.open(QIODevice::WriteOnly);
+    QString st;
+    QString idxSt, cmdSt;
+    int mid=0;
+    int idx = 0;
+    while(idx<m_scrNames.count()) {
+        st = m_scrNames.value(idx)->text() + "," + m_scrCommands.value(idx)->text()+"\n";
+        f.write(st.toLocal8Bit());
+        idx++;
+    }
+    f.close();
+}
+
+void MainWindow::on_bAddScript_clicked(QString nm, QString cmd)
+{
+    // create horiz layout
     //add lineedit for cmd, name, button send and button del
     QHBoxLayout *lay = new QHBoxLayout;
     QLabel *lNum = new QLabel(this); lNum->setText(tr("%1) ").arg(m_scrButs.size()+1));
-    QLineEdit *eName = new QLineEdit(this);
-    QLineEdit *eCmd = new QLineEdit(this);
-    QCheckBox *cbHex = new QCheckBox(this);
+    QLineEdit *eName = new QLineEdit(this); eName->setText(nm);
+    QLineEdit *eCmd = new QLineEdit(this); eCmd->setText(cmd);
+    //QCheckBox *cbHex = new QCheckBox(this);
     QPushButton *bSend = new QPushButton(this); bSend->setText("Send");
     QPushButton *bDel = new QPushButton(this); bDel->setText("Del");
-    cbHex->setText("Hex");
-    lay->addWidget(lNum);lay->addWidget(eName);lay->addWidget(eCmd, 2);lay->addWidget(cbHex);
-    lay->addWidget(bSend); lay->addWidget(bDel); lay->addStretch(1);
+    //cbHex->setText("Hex");
+    lay->addWidget(lNum);lay->addWidget(eName);lay->addWidget(eCmd, 2);//lay->addWidget(cbHex);
+    lay->addWidget(bSend); lay->addWidget(bDel); lay->addStretch(0);
 
     connect(bSend, &QPushButton::clicked, this, &MainWindow::onScriptSendButton);
     connect(bDel, &QPushButton::clicked, this, &MainWindow::onScriptDelButton);
     (static_cast<QBoxLayout*>(ui->tabScripts->layout()))->addLayout(lay);
     m_scrButs.append(bSend);
     m_scrDelButs.append(bDel);
+    m_scrNames.append(eName);
     m_scrCommands.append(eCmd);
     m_scrLays.append(lay);
 }
@@ -236,26 +276,52 @@ void MainWindow::onScriptSendButton()
 
 }
 
-void MainWindow::onScriptDelButton()
+void MainWindow::onScriptDelButton(int defIdx)
 {
-    QPushButton* b = dynamic_cast<QPushButton*>(QObject::sender());
-    if (b==nullptr) return;
-    int idx = m_scrDelButs.indexOf(b);
+    int idx;
+    if (defIdx<0) {
+        QPushButton* b = dynamic_cast<QPushButton*>(QObject::sender());
+        if (b==nullptr) return;
+        idx = m_scrDelButs.indexOf(b);
+    } else idx = defIdx;
     qDebug() << "delete script" << idx;
     if (idx<0) return;
     QBoxLayout * lay = static_cast<QBoxLayout*>(ui->tabScripts->layout());
     QBoxLayout *lay2 = m_scrLays.value(idx);
     QLayoutItem *itm;
+
+    // remove from lists
+    m_scrLays.removeAt(idx);
+    m_scrButs.removeAt(idx);
+    m_scrDelButs.removeAt(idx);
+    m_scrNames.removeAt(idx);
+    m_scrCommands.removeAt(idx);
+
+    // remove items from layout, and delete them
     while ((itm=lay2->takeAt(0))!=nullptr) {
-        QWidget *b = itm->widget();
+        QWidget *w = itm->widget();
         delete itm;
-        if (b==nullptr) continue;
-        qDebug() << "delwidget:" << b->objectName();
-        disconnect(b, 0,0,0);
-        lay2->removeWidget(b);
-        b->deleteLater();
+        if (w==nullptr) continue;
+        qDebug() << "delwidget:" << w->objectName();
+        disconnect(w, 0,0,0);
+        lay2->removeWidget(w);
+        w->deleteLater();
         // todo: delete item from lists!
     };
+    // remove layout
     lay->removeItem(lay2);
     lay2->deleteLater();
+}
+
+void MainWindow::on_bSaveScripts_clicked()
+{
+    _saveScriptsToFile();
+}
+
+void MainWindow::on_bClearScripts_clicked()
+{
+    int idx, max;
+    max = m_scrButs.count();
+    for (idx = 0; idx<max; idx++)
+        onScriptDelButton(idx);
 }

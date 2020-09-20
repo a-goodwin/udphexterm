@@ -48,11 +48,17 @@ private slots:
     void ticon_activated(QSystemTrayIcon::ActivationReason reason);
 
 
-    void on_bAddScript_clicked();
+    void on_bAddScript_clicked(QString nm="", QString cmd="");
     void onScriptSendButton();
-    void onScriptDelButton();
+    void onScriptDelButton(int defIdx=-1);
+    void on_bSaveScripts_clicked();
+
+    void on_bClearScripts_clicked();
+
 private:
     void _disconn();
+    void _fetchScriptsFromFile();
+    void _saveScriptsToFile();
 
     Ui::MainWindow *ui;
 
@@ -62,6 +68,7 @@ private:
     QList<QPushButton*> m_scrButs;
     QList<QHBoxLayout*> m_scrLays;
     QList<QPushButton*> m_scrDelButs;
+    QList<QLineEdit*> m_scrNames;
     QList<QLineEdit*> m_scrCommands;
 };
 
