@@ -12,6 +12,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QIcon *icon = new QIcon("ICON/icon1.png");
     ticon = new QSystemTrayIcon(this);
     ui->setupUi(this);
+    this->setWindowTitle(windowTitle().append(" " APP_VER_STR));
+
     ticon->setIcon(*icon);
     ticon->show();
 
@@ -20,7 +22,9 @@ MainWindow::MainWindow(QWidget *parent) :
     receiver.clear();
     ui->eSender->setData(sender);
     ui->eReceiver->setData(receiver);
+    ui->eBaudRate->setCurrentIndex(2);
     baudrate = ui->eBaudRate->currentText().toInt();
+
     on_bUartRefresh_clicked();
 
     connect(ticon, &QSystemTrayIcon::activated, this, &MainWindow::ticon_activated);

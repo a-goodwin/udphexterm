@@ -9,6 +9,8 @@
 
 #define CH0 QLatin1Char('0')
 
+#define APP_VER_STR "1.05"
+
 namespace Ui {
 class MainWindow;
 }

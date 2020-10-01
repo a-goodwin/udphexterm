@@ -20,7 +20,7 @@ public:
     bool setData(QIODevice &);
     QByteArray dataAt(qint64, qint64=-1);
     bool write(QIODevice &iODevice, qint64=0, qint64=-1);
-    
+
     void insert(qint64, char);
     void remove(qint64, qint64);
     void replace(qint64, char);
@@ -38,6 +38,7 @@ public:
     bool highlighting();
     qint64 lastIndexOf(QByteArray &, qint64);
     QString selectionToReadableString();
+    QString selectedData();
     void setFont(const QFont &);
     QString toReadableString();
 
