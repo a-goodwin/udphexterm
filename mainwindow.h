@@ -9,7 +9,7 @@
 #include "configutils.h"
 #define CH0 QLatin1Char('0')
 
-#define APP_VER_STR "0.2"
+#define APP_VER_STR "0.25"
 
 namespace Ui {
 class MainWindow;
