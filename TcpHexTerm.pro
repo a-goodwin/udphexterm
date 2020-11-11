@@ -4,11 +4,11 @@
 #
 #-------------------------------------------------
 
-QT       += core gui serialport
+QT       += core gui network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = SER_TEST
+TARGET = TcpHexTerm
 TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use
@@ -30,6 +30,7 @@ SOURCES += \
         QHexEdit/commands.cpp \
         QHexEdit/qhexedit.cpp
 HEADERS += \
+        configutils.h \
         mainwindow.h \
         QHexEdit/chunks.h \
         QHexEdit/commands.h \

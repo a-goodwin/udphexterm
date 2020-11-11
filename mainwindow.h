@@ -2,14 +2,14 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QSerialPort>
-#include <QSerialPortInfo>
 #include <QTimer>
-#include <QSystemTrayIcon>
-
+//#include <QSystemTrayIcon>
+#include <QTcpSocket>
+#include <QSettings>
+#include "configutils.h"
 #define CH0 QLatin1Char('0')
 
-#define APP_VER_STR "1.05"
+#define APP_VER_STR "0.2"
 
 namespace Ui {
 class MainWindow;
@@ -27,27 +27,28 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    QSystemTrayIcon *ticon;
+    //QSystemTrayIcon *ticon;
 protected:
+    QSettings *set;
+
     QByteArray sender, receiver;
-    QSerialPort serial;
-    QList<QSerialPortInfo> ports;
-    qint32 baudrate;
-    QSerialPortInfo curSer;
-    QTimer resendTimer, refreshTimer;
+    QTcpSocket *sock;
+    //qint32 baudrate;
+    QTimer resendTimer;
 private slots:
-    void on_serials_activated(int index);
-    void onSerialData();
-    void onSerialError(QSerialPort::SerialPortError error);
+    void onSockData();
     void on_bClearTransmitter_clicked();
     void on_bClearReceiver_clicked();
     void on_bSend_clicked();
-    void on_TimerUartRefresh();
-    void on_bUartRefresh_clicked();
+    void on_sockError(QAbstractSocket::SocketError socketError);
+    void on_sockConn();
+    void on_sockDisconn();
+
+    //void on_TimerUartRefresh();
+    //void on_bUartRefresh_clicked();
     void on_bConnect_clicked();
-    void on_eBaudRate_activated(const QString &arg1);
     void on_bReSend_clicked(bool checked);
-    void ticon_activated(QSystemTrayIcon::ActivationReason reason);
+    //void ticon_activated(QSystemTrayIcon::ActivationReason reason);
 
 
     void on_bAddScript_clicked(QString nm="", QString cmd="");
@@ -58,7 +59,7 @@ private slots:
     void on_bClearScripts_clicked();
 
 private:
-    void _disconn();
+    //void _disconn();
     void _fetchScriptsFromFile();
     void _saveScriptsToFile();
 

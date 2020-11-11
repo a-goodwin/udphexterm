@@ -20,100 +20,33 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
-         <widget class="QPushButton" name="bUartRefresh">
+         <widget class="QLabel" name="label_4">
           <property name="text">
-           <string>Refresh</string>
+           <string>Адрес: </string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="serials">
+         <widget class="QLineEdit" name="eAddress"/>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_5">
+          <property name="text">
+           <string>Порт: </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="ePort">
           <property name="minimumSize">
            <size>
-            <width>200</width>
+            <width>80</width>
             <height>0</height>
            </size>
           </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QComboBox" name="eBaudRate">
-          <property name="currentText">
-           <string>9600</string>
+          <property name="maximum">
+           <number>65535</number>
           </property>
-          <property name="maxVisibleItems">
-           <number>16</number>
-          </property>
-          <item>
-           <property name="text">
-            <string>1200</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>4800</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>9600</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>19200</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>38400</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>57600</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>64000</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>115200</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>120000</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>128000</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>384000</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>576000</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>921600</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>2000000</string>
-           </property>
-          </item>
          </widget>
         </item>
         <item>
@@ -171,7 +104,7 @@
         <item>
          <widget class="QTabWidget" name="tabWidget">
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="tabHex">
            <attribute name="title">
