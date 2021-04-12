@@ -26,7 +26,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->eSender->setData(sender);
     ui->eReceiver->setData(receiver);
     C2US(set, ui->eAddress);
-    C2UI(set, ui->ePort);
+    C2UI(set, ui->eOurPort);
+    C2UI(set, ui->eTargetPort);
 
     sock = new QUdpSocket(this);
 
@@ -59,8 +60,8 @@ void MainWindow::onSockData()
         data.append(dgr.data());
     }
     receiver.append(data);
+    lastRecvBytes = data.size();
     ui->eReceiver->setData(receiver);
-    ui->lNBytes->setText(tr("Read 0x%1 bytes, total 0x%2").arg(data.size(), 4, 16, CH0).arg(receiver.size(), 4, 16, CH0));
 }
 
 void MainWindow::on_bClearTransmitter_clicked()
@@ -68,6 +69,8 @@ void MainWindow::on_bClearTransmitter_clicked()
     sender.clear();
     ui->eSender->setData(sender);
     bytesSent = 0;
+    lastSendBytes = 0;
+    _updateLabels();
 }
 
 void MainWindow::on_bClearReceiver_clicked()
@@ -75,6 +78,8 @@ void MainWindow::on_bClearReceiver_clicked()
     receiver.clear();
     ui->eReceiver->setData(receiver);
     ui->lNBytes->clear();
+    lastRecvBytes=0;
+    _updateLabels();
 }
 
 void MainWindow::on_bSend_clicked()
@@ -82,16 +87,14 @@ void MainWindow::on_bSend_clicked()
     QByteArray data;
     if (sendData.size()==0) data = ui->eSender->data();
     else { data = sendData; sendData.clear();}
-    //if (!sock->isOpen()) return;
 
     qDebug() << "send()";
 
     QHostAddress addr(ui->eAddress->text());
-    sock->writeDatagram(data, addr, ui->ePort->value());
-    bytesSent += data.size();
-    QString st = ui->lNBytes->text();
-    st = tr(" Sent 0x%1 bytes, total 0x%2").arg(data.size()).arg(bytesSent);
-    ui->label_3->setText(st);
+    sock->writeDatagram(data, addr, ui->eTargetPort->value());
+    lastSendBytes = data.size();
+    bytesSent += lastSendBytes;
+    _updateLabels();
 }
 
 void MainWindow::on_sockError(QAbstractSocket::SocketError socketError)
@@ -102,23 +105,13 @@ void MainWindow::on_sockError(QAbstractSocket::SocketError socketError)
     }
 }
 
-void MainWindow::on_sockConn()
-{
-    ui->lOK->setText(tr("Connected %1:%2").arg(sock->peerAddress().toString()).arg(sock->localPort()));
-    ui->bConnect->setText("Disconnect");
-}
-
-void MainWindow::on_sockDisconn()
-{
-    ui->bConnect->setText("Connect");
-    bytesSent = 0;
-}
-
 void MainWindow::on_bConnect_clicked()
 {
-    sock->bind(QHostAddress::Any, ui->ePort->value());
+    sock->bind(QHostAddress::Any, ui->eOurPort->value());
     U2CS(set, ui->eAddress);
-    U2CI(set, ui->ePort);
+    U2CI(set, ui->eOurPort);
+    U2CI(set, ui->eTargetPort);
+    _updateLabels();
 }
 
 void MainWindow::on_bReSend_clicked(bool checked)
@@ -169,6 +162,17 @@ void MainWindow::_saveScriptsToFile()
         idx++;
     }
     f.close();
+}
+
+void MainWindow::_updateLabels()
+{
+    ui->lOK->setText(tr("Connected %1:%2").arg(sock->peerAddress().toString()).arg(sock->localPort()));
+    QString st = ui->lNBytes->text();
+
+    st = tr(" Sent 0x%1 bytes, total 0x%2").arg(lastSendBytes).arg(bytesSent);
+    ui->label_3->setText(st);
+
+    ui->lNBytes->setText(tr("Read 0x%1 bytes, total 0x%2").arg(lastRecvBytes, 4, 16, CH0).arg(receiver.size(), 4, 16, CH0));
 }
 
 void MainWindow::on_bAddScript_clicked(QString nm, QString cmd)

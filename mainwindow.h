@@ -41,8 +41,6 @@ private slots:
     void on_bClearReceiver_clicked();
     void on_bSend_clicked();
     void on_sockError(QAbstractSocket::SocketError socketError);
-    void on_sockConn();
-    void on_sockDisconn();
 
     //void on_TimerUartRefresh();
     //void on_bUartRefresh_clicked();
@@ -55,19 +53,19 @@ private slots:
     void onScriptSendButton();
     void onScriptDelButton(int defIdx=-1);
     void on_bSaveScripts_clicked();
-
     void on_bClearScripts_clicked();
 
 private:
     //void _disconn();
     void _fetchScriptsFromFile();
     void _saveScriptsToFile();
-
+    void _updateLabels();
     Ui::MainWindow *ui;
 
     int bytesSent=0;
     int m_curidx = -1;
-
+    int lastSendBytes=0;
+    int lastRecvBytes=0;
     QList<QPushButton*> m_scrButs;
     QList<QHBoxLayout*> m_scrLays;
     QList<QPushButton*> m_scrDelButs;

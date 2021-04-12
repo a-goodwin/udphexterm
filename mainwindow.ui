@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>QTcpHexTerminal</string>
+   <string>QUdpHexTerminal</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -32,12 +32,32 @@
         <item>
          <widget class="QLabel" name="label_5">
           <property name="text">
-           <string>Порт: </string>
+           <string>наш порт: </string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QSpinBox" name="ePort">
+         <widget class="QSpinBox" name="eOurPort">
+          <property name="minimumSize">
+           <size>
+            <width>80</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>65535</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_6">
+          <property name="text">
+           <string>порт цели: </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="eTargetPort">
           <property name="minimumSize">
            <size>
             <width>80</width>
@@ -52,7 +72,7 @@
         <item>
          <widget class="QPushButton" name="bConnect">
           <property name="text">
-           <string>Connect</string>
+           <string>Bind</string>
           </property>
          </widget>
         </item>
