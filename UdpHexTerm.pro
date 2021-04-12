@@ -1,6 +1,7 @@
 #-------------------------------------------------
 #
 # Project created by QtCreator 2018-04-03T17:54:59
+# Forked by ASG 2021.04.12
 #
 #-------------------------------------------------
 
@@ -8,7 +9,7 @@ QT       += core gui network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = TcpHexTerm
+TARGET = UdpHexTerm
 TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use

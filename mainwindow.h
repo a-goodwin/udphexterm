@@ -3,18 +3,17 @@
 
 #include <QMainWindow>
 #include <QTimer>
-//#include <QSystemTrayIcon>
-#include <QTcpSocket>
-#include <QSettings>
+#include <QUdpSocket>
 #include "configutils.h"
+
 #define CH0 QLatin1Char('0')
 
-#define APP_VER_STR "0.25"
+#define APP_VER_STR "0.01"
 
 namespace Ui {
 class MainWindow;
 }
-
+class QSettings;
 class QPushButton;
 class QLineEdit;
 class QHBoxLayout;
@@ -32,9 +31,10 @@ protected:
     QSettings *set;
 
     QByteArray sender, receiver;
-    QTcpSocket *sock;
+    QUdpSocket *sock;
     //qint32 baudrate;
     QTimer resendTimer;
+    QByteArray sendData;
 private slots:
     void onSockData();
     void on_bClearTransmitter_clicked();

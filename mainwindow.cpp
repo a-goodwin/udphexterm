@@ -6,23 +6,19 @@
 #include <QCheckBox>
 #include <QTcpSocket>
 #include <QHostAddress>
+#include <QNetworkDatagram>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-    QCoreApplication::setApplicationName("QTcpHexTerm");
+    QCoreApplication::setApplicationName("QUdpHexTerm");
     QCoreApplication::setApplicationVersion(APP_VER_STR);
     QCoreApplication::setOrganizationName("a-goodwin");
     InitConf(set,"");
 
-    //QIcon *icon = new QIcon("ICON/icon1.png");
-    //ticon = new QSystemTrayIcon(this);
     ui->setupUi(this);
     this->setWindowTitle(windowTitle().append(" " APP_VER_STR));
-
-    //ticon->setIcon(*icon);
-    //ticon->show();
 
     ui->eSender->setOverwriteMode(false);
     sender.clear();
@@ -32,15 +28,11 @@ MainWindow::MainWindow(QWidget *parent) :
     C2US(set, ui->eAddress);
     C2UI(set, ui->ePort);
 
-    sock = new QTcpSocket(this);
+    sock = new QUdpSocket(this);
 
-    connect(sock, &QTcpSocket::connected, this, &MainWindow::on_sockConn);
-    connect(sock, &QTcpSocket::disconnected, this, &MainWindow::on_sockDisconn);
-    connect(sock, &QTcpSocket::errorOccurred, this, &MainWindow::on_sockError);
-    connect(sock, &QTcpSocket::readyRead, this, &MainWindow::onSockData);
+    connect(sock, &QUdpSocket::errorOccurred, this, &MainWindow::on_sockError);
+    connect(sock, &QUdpSocket::readyRead, this, &MainWindow::onSockData);
 
-    //connect(ticon, &QSystemTrayIcon::activated, this, &MainWindow::ticon_activated);
-    //ticon_activated(QSystemTrayIcon::Trigger);
     connect(&resendTimer, &QTimer::timeout, this, &MainWindow::on_bSend_clicked);
 
     _fetchScriptsFromFile();
@@ -48,7 +40,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-   // ticon->hide();
+    sock->abort();
     sock->disconnectFromHost();
     disconnect(sock, 0,0,0);
     sock->deleteLater();
@@ -59,7 +51,13 @@ void MainWindow::onSockData()
 {
     QByteArray data;
     qDebug() << "onSockData()";
-    data = sock->readAll();
+
+    // тупое решение, так QUdpSocket будет тупить и пропускать частые
+    // пакеты. Здесь надо сокет выделять в отдельный поток!
+    while (sock->hasPendingDatagrams()) {
+        QNetworkDatagram dgr = sock->receiveDatagram();
+        data.append(dgr.data());
+    }
     receiver.append(data);
     ui->eReceiver->setData(receiver);
     ui->lNBytes->setText(tr("Read 0x%1 bytes, total 0x%2").arg(data.size(), 4, 16, CH0).arg(receiver.size(), 4, 16, CH0));
@@ -81,13 +79,15 @@ void MainWindow::on_bClearReceiver_clicked()
 
 void MainWindow::on_bSend_clicked()
 {
-
-    QByteArray data = ui->eSender->data();
-    if (!sock->isOpen()) return;
+    QByteArray data;
+    if (sendData.size()==0) data = ui->eSender->data();
+    else { data = sendData; sendData.clear();}
+    //if (!sock->isOpen()) return;
 
     qDebug() << "send()";
 
-    sock->write(data);
+    QHostAddress addr(ui->eAddress->text());
+    sock->writeDatagram(data, addr, ui->ePort->value());
     bytesSent += data.size();
     QString st = ui->lNBytes->text();
     st = tr(" Sent 0x%1 bytes, total 0x%2").arg(data.size()).arg(bytesSent);
@@ -98,7 +98,7 @@ void MainWindow::on_sockError(QAbstractSocket::SocketError socketError)
 {
     qDebug() << "socket error" << static_cast<int>(socketError) << ":" << sock->errorString();
     if (sock->state()!=QAbstractSocket::ConnectedState) {
-        sock->close();
+        sock->abort();
     }
 }
 
@@ -116,44 +116,9 @@ void MainWindow::on_sockDisconn()
 
 void MainWindow::on_bConnect_clicked()
 {
-    //
-    //qint32 br;
-    if (sock->isOpen()) { // already opened, close
-        sock->close();
-        ui->bConnect->setText("Connect");
-        bytesSent = 0;
-    } else { // disconnected, try to connect
-        sock->connectToHost(ui->eAddress->text(), ui->ePort->value());
-        U2CS(set, ui->eAddress);
-        U2CI(set, ui->ePort);
-    }
-
-    //
-//    if (!serial.isOpen()) { // если не подключен
-//        // устанавливаем новый
-//        serial.setPort(curSer);
-//        serial.setDataBits(QSerialPort::Data8);
-//        serial.setStopBits(QSerialPort::OneStop);
-//        serial.setParity(QSerialPort::NoParity);
-
-//        // подключаем
-//        if (serial.open(QIODevice::ReadWrite)) {
-//            connect(&serial, &QIODevice::readyRead, this, &MainWindow::onSockData);
-//            connect(&serial, &QSerialPort::errorOccurred, this, &MainWindow::onSerialError);
-//            serial.setBaudRate(baudrate);
-//            br = serial.baudRate();
-//            ui->lOK->setText(tr("Connected %1-%3:%4 @ %2 ").arg(serial.portName()).arg(br).arg(curSer.vendorIdentifier(), 4, 16, CH0).arg(curSer.productIdentifier(), 4, 16, CH0));
-//            receiver.clear();
-//            ui->eReceiver->setData(receiver);
-//            ui->bConnect->setText("Отключиться");
-//        }
-//        else {
-//            ui->lOK->setText(tr("Не удалось подключиться к %1").arg(serial.portName()));
-//            ui->bConnect->setText("Подключиться");
-//        }
-//    } else { // отключаем
-//        _disconn();
-//    }
+    sock->bind(QHostAddress::Any, ui->ePort->value());
+    U2CS(set, ui->eAddress);
+    U2CI(set, ui->ePort);
 }
 
 void MainWindow::on_bReSend_clicked(bool checked)
@@ -168,14 +133,6 @@ void MainWindow::on_bReSend_clicked(bool checked)
         ui->bReSend->setText("Stop");
     }
 }
-
-//void MainWindow::ticon_activated(QSystemTrayIcon::ActivationReason reason)
-//{
-//    Q_UNUSED(reason);
-//    QString st = "Available ports:\n";
-//    for (int i=0; i<ui->serials->count(); i++) st.append(tr("%1\n").arg(ui->serials->itemText(i)));
-//    ticon->showMessage("available ports", st, QIcon());
-//}
 
 void MainWindow::_fetchScriptsFromFile()
 {
@@ -249,12 +206,8 @@ void MainWindow::onScriptSendButton()
     if (!sock->isOpen()) return;
     QLineEdit *le = dynamic_cast<QLineEdit*>(m_scrCommands.value(idx));
 
-    QByteArray dat = QByteArray::fromHex(le->text().toLocal8Bit());
-    sock->write(dat);
-    bytesSent += dat.size();
-    QString st = tr(" Sent 0x%1 bytes, total 0x%2").arg(dat.size()).arg(bytesSent);
-    ui->label_3->setText(st);
-
+    sendData = QByteArray::fromHex(le->text().toLocal8Bit());
+    on_bSend_clicked();
 }
 
 void MainWindow::onScriptDelButton(int defIdx)
